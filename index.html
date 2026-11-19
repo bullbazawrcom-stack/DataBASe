@@ -1,0 +1,172 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Database</title>
+
+    <style>
+        label { display: inline-block; width: 80px; }
+    </style>
+</head>
+
+<body>
+
+    <h2>Student Database</h2>
+
+    <label>Name</label>
+    <input id="NameBox" type="text"><br><br>
+
+    <label>RollNo</label>
+    <input id="RollBox" type="text"><br><br>
+
+    <label>Section</label>
+    <input id="Secbox" type="text"><br><br>
+
+    <label>Gender</label>
+    <select id="Genbox">
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+    </select>
+
+    <hr>
+
+    <button id="Insbtn">Insert</button>
+    <button id="Selbtn">Select</button>
+    <button id="Updbtn">Update</button>
+    <button id="Delbtn">Delete</button>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-app.js";
+
+import {
+    getDatabase,
+    ref,
+    set,
+    get,
+    update,
+    remove
+} from "https://www.gstatic.com/firebasejs/13.4.0/firebase-database.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyAmZTyN-CfUDmbKrVmc6_xNZEdrS9j_NRo",
+    authDomain: "testing-b3e7d.firebaseapp.com",
+    databaseURL: "https://testing-b3e7d-default-rtdb.firebaseio.com",
+    projectId: "testing-b3e7d",
+    storageBucket: "testing-b3e7d.firebasestorage.app",
+    messagingSenderId: "377065532776",
+    appId: "1:377065532776:web:24b605bd6094739806badd"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+var namebox = document.getElementById("NameBox");
+var rollbox = document.getElementById("RollBox");
+var secbox = document.getElementById("Secbox");
+var genbox = document.getElementById("Genbox");
+
+var insBtn = document.getElementById("Insbtn");
+var selBtn = document.getElementById("Selbtn");
+var updBtn = document.getElementById("Updbtn");
+var delBtn = document.getElementById("Delbtn");
+
+function checkInput() {
+    if (!namebox.value.trim() ||
+        !rollbox.value.trim() ||
+        !secbox.value.trim()) {
+        alert("Please fill in all fields!");
+        return false;
+    }
+    return true;
+}
+
+// INSERT
+
+function InsertData() {
+    if (!checkInput()) return;
+
+    set(ref(db, "TheStudents/" + rollbox.value.trim()), {
+        NameOfStd: namebox.value.trim(),
+        RollNo: rollbox.value.trim(),
+        Section: secbox.value.trim(),
+        Gender: genbox.value
+    })
+    .then(() => alert("Data stored successfully!"))
+    .catch((error) => alert(error.message));
+}
+
+// SELECT
+
+function SelectData() {
+    if (!rollbox.value.trim()) {
+        alert("Enter RollNo first!");
+        return;
+    }
+
+    get(ref(db, "TheStudents/" + rollbox.value.trim()))
+    .then((snapshot) => {
+        if (snapshot.exists()) {
+            var data = snapshot.val();
+
+            namebox.value = data.NameOfStd;
+            rollbox.value = data.RollNo;
+            secbox.value = data.Section;
+            genbox.value = data.Gender;
+
+            alert("Student found!");
+        } else {
+            alert("Student not found!");
+        }
+    })
+    .catch((error) => alert(error.message));
+}
+
+// UPDATE
+
+function UpdateData() {
+    if (!checkInput()) return;
+
+    update(ref(db, "TheStudents/" + rollbox.value.trim()), {
+        NameOfStd: namebox.value.trim(),
+        RollNo: rollbox.value.trim(),
+        Section: secbox.value.trim(),
+        Gender: genbox.value
+    })
+    .then(() => alert("Data updated successfully!"))
+    .catch((error) => alert(error.message));
+}
+
+// DELETE
+
+function DeleteData() {
+    if (!rollbox.value.trim()) {
+        alert("Enter RollNo first!");
+        return;
+    }
+
+    if (!confirm("Delete this student?")) return;
+
+    remove(ref(db, "TheStudents/" + rollbox.value.trim()))
+    .then(() => {
+        alert("Student deleted!");
+        namebox.value = "";
+        rollbox.value = "";
+        secbox.value = "";
+    })
+    .catch((error) => alert(error.message));
+}
+
+// BUTTON EVENTS
+
+insBtn.addEventListener("click", InsertData);
+selBtn.addEventListener("click", SelectData);
+updBtn.addEventListener("click", UpdateData);
+delBtn.addEventListener("click", DeleteData);
+
+</script>
+
+</body>
+</html>
